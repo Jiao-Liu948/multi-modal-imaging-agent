@@ -7,6 +7,9 @@
   --bg-0: #06051a;
   --bg-1: #0d0a29;
 
+  /* 顶栏固定高度：顶栏用 position: fixed 常驻，.shell 用它补偿上边距 */
+  --header-h: 66px;
+
   --surface: rgba(255, 255, 255, 0.055);
   --surface-2: rgba(255, 255, 255, 0.09);
   --surface-solid: #16123a;
@@ -53,7 +56,10 @@
 html,
 body {
   max-width: 100vw;
+  /* 用 clip 而不是 hidden：hidden 会创建滚动容器，导致 position: sticky 失效。
+     这里保留 hidden 作为旧浏览器降级，支持 clip 的浏览器会采用后者。 */
   overflow-x: hidden;
+  overflow-x: clip;
   height: 100%;
   color-scheme: dark;
 }
@@ -107,7 +113,10 @@ a {
 .app {
   position: relative;
   min-height: 100vh;
-  overflow: hidden;
+  /* 必须是 clip 而不是 hidden：祖先元素上任何非 visible 的 overflow
+     都会让内部 .site-header 的 position:sticky 失效（退化为静态定位）。
+     clip 同样能横向裁掉溢出的极光光斑，但不会创建滚动容器，sticky 照常生效。 */
+  overflow-x: clip;
 }
 
 .aurora {
@@ -176,6 +185,8 @@ a {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  /* 顶栏是 fixed 常驻的，这里补偿等高上边距，避免内容被遮住 */
+  padding-top: var(--header-h);
 }
 
 .wrap {
@@ -187,12 +198,18 @@ a {
 
 /* ============ 顶栏 ============ */
 .site-header {
-  position: sticky;
+  /* 用 fixed 而不是 sticky：sticky 会被祖先的 overflow 影响而失效，
+     这里要求"始终固定"——滚动时导航栏必须不动。 */
+  position: fixed;
   top: 0;
-  z-index: 20;
+  left: 0;
+  right: 0;
+  /* 高于 .overlay(60)，保证相册等弹层打开时导航栏依然可用；
+     低于 .overlay-close(80) 与 .fab(40) 的层级关系不受影响。 */
+  z-index: 90;
   backdrop-filter: blur(16px) saturate(150%);
   -webkit-backdrop-filter: blur(16px) saturate(150%);
-  background: rgba(8, 6, 26, 0.55);
+  background: rgba(8, 6, 26, 0.78);
   border-bottom: 1px solid var(--border);
 }
 .site-header-inner {
@@ -200,7 +217,7 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 13px 0;
+  height: var(--header-h);
 }
 .brand {
   display: flex;
@@ -230,6 +247,19 @@ a {
   color: var(--text-3);
   letter-spacing: 0.6px;
   text-transform: uppercase;
+}
+
+/* ---- 顶栏右侧操作区 ---- */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+/* 图标与文字分开包裹：窄屏只隐藏文字，图标按钮仍可点 */
+.nav-ico {
+  font-size: 15px;
+  line-height: 1;
 }
 
 /* ============ 按钮 ============ */
@@ -647,49 +677,6 @@ a {
   background: var(--border-strong);
 }
 
-/* ============ 功能卡片 ============ */
-.features {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(272px, 1fr));
-  gap: 16px;
-}
-.feature {
-  position: relative;
-  padding: 22px 20px;
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  backdrop-filter: blur(12px);
-  overflow: hidden;
-  transition: transform 0.24s ease, border-color 0.24s ease, background 0.24s ease;
-}
-.feature:hover {
-  transform: translateY(-5px);
-  border-color: rgba(139, 92, 246, 0.55);
-  background: rgba(139, 92, 246, 0.09);
-}
-.feature-ico {
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-  font-size: 22px;
-  margin-bottom: 14px;
-  background: rgba(139, 92, 246, 0.16);
-  border: 1px solid var(--border);
-}
-.feature h3 {
-  font-size: 15px;
-  font-weight: 720;
-  margin-bottom: 8px;
-}
-.feature p {
-  font-size: 13px;
-  line-height: 1.72;
-  color: var(--text-2);
-}
-
 /* ============ 使用流程 ============ */
 .steps {
   display: grid;
@@ -752,23 +739,6 @@ a {
 .cta-note {
   font-size: 12.5px;
   color: var(--text-3);
-}
-.cta-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13.5px;
-  font-weight: 620;
-  color: var(--text-2);
-  padding: 9px 20px;
-  border-radius: var(--pill);
-  border: 1px dashed var(--border-strong);
-  transition: all 0.22s ease;
-}
-.cta-secondary:hover {
-  color: var(--text);
-  border-color: var(--violet);
-  background: rgba(139, 92, 246, 0.14);
 }
 
 /* ============ 全局记忆问答（独立弹层） ============ */
@@ -1831,5 +1801,16 @@ a {
   }
   .overlay {
     padding: 60px 12px 20px;
+  }
+  /* 顶栏窄屏只留图标：文字收起，按钮保持 34px 圆形可点热区 */
+  .nav-actions {
+    gap: 8px;
+  }
+  .nav-label {
+    display: none;
+  }
+  .nav-actions .btn-sm {
+    padding: 0 10px;
+    min-width: 34px;
   }
 }
