@@ -7,7 +7,6 @@ import { tagClass } from '@/app/api';
 interface Props {
   overview: Overview | null;
   onOpenAlbum: () => void;
-  onOpenGlobalChat: () => void;
 }
 
 /** 记忆来源的可读标签 */
@@ -30,40 +29,7 @@ const CAPABILITIES: { key: 'vector_search' | 'face_cluster' | 'proactive'; label
   { key: 'proactive', label: '主动提醒调度' },
 ];
 
-const FEATURES = [
-  {
-    icon: '🧩',
-    title: '多模态解析管线',
-    desc: 'EXIF 元数据、视觉语义理解、人脸检测聚类多路并行，影像入库即完成结构化，无需人工录入。',
-  },
-  {
-    icon: '🗂️',
-    title: '结构化记忆沉淀',
-    desc: '按时间 / 地点 / 事件 / 人物 / 情感 / 标签六维 schema 落库，每条记忆绑定影像与原始上下文，可溯源。',
-  },
-  {
-    icon: '🔀',
-    title: '双引擎融合检索',
-    desc: '实体条件匹配度与向量语义相似度按查询意图加权融合排序，模糊提问也能跨影像回溯。',
-  },
-  {
-    icon: '⚖️',
-    title: '记忆冲突消解',
-    desc: '新旧记忆语义比对后自动合并 / 覆盖 / 归档，历史版本标记失效而非物理删除，保留完整变更轨迹。',
-  },
-  {
-    icon: '🔔',
-    title: '主动知识运营',
-    desc: '纪念日提醒、相似影像推荐、年度时间线生成，全部由后端调度器按事件驱动，不依赖用户主动查询。',
-  },
-  {
-    icon: '📉',
-    title: '上下文成本控制',
-    desc: '长对话自动摘要压缩以控制 Token 占用，配合全链路统一日志与模型调用链追踪。',
-  },
-];
-
-export default function SystemOverview({ overview, onOpenAlbum, onOpenGlobalChat }: Props) {
+export default function SystemOverview({ overview, onOpenAlbum }: Props) {
   const assets = overview?.assets;
   const knowledge = overview?.knowledge;
   const timeline = overview?.timeline ?? [];
@@ -248,24 +214,7 @@ export default function SystemOverview({ overview, onOpenAlbum, onOpenGlobalChat
         })}
       </div>
 
-      {/* 核心能力 */}
-      <div className="section-label">核心能力</div>
-      <div className="features">
-        {FEATURES.map((f, i) => (
-          <motion.div
-            key={f.title}
-            className="feature"
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.45, delay: (i % 3) * 0.08 }}
-          >
-            <div className="feature-ico">{f.icon}</div>
-            <h3>{f.title}</h3>
-            <p>{f.desc}</p>
-          </motion.div>
-        ))}
-      </div>
+      {/* 核心能力区块已按要求移除（能力关键词仍由上方 .caps 标签与 hero 文案承载） */}
 
       {/* 入口 */}
       <motion.div
@@ -284,9 +233,6 @@ export default function SystemOverview({ overview, onOpenAlbum, onOpenGlobalChat
             ? `已纳管 ${assetCount} 张影像，持续沉淀结构化知识`
             : '尚无影像资产，导入第一批影像即可启动解析管线'}
         </div>
-        <button className="cta-secondary" onClick={onOpenGlobalChat}>
-          🧠 跨影像知识问答
-        </button>
         {overview?.generated_at && <div className="overview-stamp">指标更新于 {overview.generated_at}</div>}
       </motion.div>
     </div>

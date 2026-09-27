@@ -279,21 +279,22 @@ export default function Home() {
                 <div className="brand-tag">Multimodal Knowledge Agent</div>
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <NotificationBell unread={unreadCount} onClick={openNotifications} />
-              <button className="btn btn-glass btn-sm" onClick={openGlobalChat}>
-                🧠 跨影像知识问答
+            <div className="nav-actions">
+              <button className="btn btn-glass btn-sm" onClick={() => setAlbumOpen(true)}>
+                <span className="nav-ico" aria-hidden>🗂️</span>
+                <span className="nav-label">进入影像资产库</span>
               </button>
+              <button className="btn btn-glass btn-sm" onClick={openGlobalChat}>
+                <span className="nav-ico" aria-hidden>🔍</span>
+                <span className="nav-label">跨影像知识问答</span>
+              </button>
+              <NotificationBell unread={unreadCount} onClick={openNotifications} />
             </div>
           </div>
         </header>
 
         <main style={{ flex: 1 }}>
-          <SystemOverview
-            overview={overview}
-            onOpenAlbum={() => setAlbumOpen(true)}
-            onOpenGlobalChat={openGlobalChat}
-          />
+          <SystemOverview overview={overview} onOpenAlbum={() => setAlbumOpen(true)} />
         </main>
       </div>
 
